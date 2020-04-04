@@ -1,6 +1,6 @@
 <?php
 
-namespace Elhebert\SubresourceIntegrity\Tests;
+namespace JulioMotol\AuthTimeout\Tests;
 
 use JulioMotol\AuthTimeout\ServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;

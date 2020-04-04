@@ -9,7 +9,7 @@ use Illuminate\Events\Dispatcher;
 use Illuminate\Session\SessionManager;
 use JulioMotol\AuthTimeout\Events\AuthTimeoutEvent;
 
-class AuthSessionTimeout
+class AuthTimeoutMiddleWare
 {
     /**
      * The Authentication Manager.
