@@ -9,8 +9,8 @@ class AuthTimeoutEvent
     use SerializesModels;
 
     /**
-     * The user that timed out
-     * 
+     * The user that timed out.
+     *
      * @var \Illuminate\Contracts\Auth\Authenticatable
      */
     public $user;
