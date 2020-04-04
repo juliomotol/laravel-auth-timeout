@@ -1,5 +1,10 @@
 # Laravel Auth Timeout
 
+[![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
+[![StyleCI](https://github.styleci.io/repos/252781961/shield?branch=master)](https://github.styleci.io/repos/252781961)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/juliomotol/laravel-auth-timeout.svg?style=flat-square)](https://packagist.org/packages/juliomotol/laravel-auth-timeout)
+[![Total Downloads](https://img.shields.io/packagist/dt/juliomotol/laravel-auth-timeout.svg?style=flat-square)](https://packagist.org/packages/juliomotol/laravel-auth-timeout)
+
 A small Laravel 6+ package that handles Authentication Timeouts.
 
 ## Why Laravel Auth Timeout?
@@ -75,6 +80,8 @@ Route::get('/admin', [
     'middleware' => ['auth.timeout:web.admin']
 ]);
 ```
+
+> NOTE: This package only works with guards that uses 'session' as its driver
 
 ### AuthTimeoutEvent
 
