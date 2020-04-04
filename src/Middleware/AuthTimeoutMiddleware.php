@@ -33,20 +33,6 @@ class AuthTimeoutMiddleWare
     protected $session;
 
     /**
-     * The session name.
-     *
-     * @var string
-     */
-    protected $session_name;
-
-    /**
-     * The timeout duration in minutes.
-     *
-     * @var int
-     */
-    protected $timeout;
-
-    /**
      * Create an AuthTimeoutMiddleware.
      *
      * @param  \Illuminate\Auth\AuthManager  $auth
@@ -58,8 +44,6 @@ class AuthTimeoutMiddleWare
         $this->auth = $auth;
         $this->event = $event;
         $this->session = $session;
-        $this->session_name = config('auth-timeout.session');
-        $this->timeout = config('auth-timeout.timeout');
     }
 
     /**
@@ -73,6 +57,8 @@ class AuthTimeoutMiddleWare
      */
     public function handle($request, Closure $next, $guard = null)
     {
+        $session_name = config('auth-timeout.session');
+
         // When there are no user's logged in, just let them pass through
         if ($this->auth->guard($guard)->guest()) {
             return $next($request);
@@ -81,31 +67,27 @@ class AuthTimeoutMiddleWare
         // At this point we know that every user that reaches here is
         // authenticated. If they are newly logged in, and no session had been
         // set yet, lets set that here for now.
-        if (! $this->session->get($this->session_name)) {
-            $this->session->put($this->session_name, time());
+        if (! $this->session->get($session_name)) {
+            $this->session->put($session_name, time());
         }
 
-        // Now lets check if they have been idle for the timeout duration.If so
-        // we'll log them out, dispatch an event, the invalidate the session
+        // Now lets check if they have been idle for the timeout duration. If 
+        // so we'll log them out, dispatch an event, invalidate the session
         // we've set, and throw and AuthenticationException.
-        if ((time() - $this->session->get($this->session_name)) > $this->timeout * 60) {
+        if ((time() - (int)$this->session->get($session_name)) > (config('auth-timeout.timeout') * 60)) {
             $user = $this->auth->guard($guard)->user();
 
             $this->auth->guard($guard)->logout();
 
             $this->event->dispatch(new AuthTimeoutEvent($user));
 
-            $this->session->forget($this->session_name);
+            $this->session->forget($session_name);
 
-            throw new AuthenticationException(
-                'Timed out.',
-                [$guard],
-                $this->redirectTo($request)
-            );
+            throw new AuthenticationException('Timed out.', [$guard], $this->redirectTo($request));
         }
 
         // Refresh our session with the current time.
-        $this->session->put($this->session_name, time());
+        $this->session->put($session_name, time());
 
         return $next($request);
     }
