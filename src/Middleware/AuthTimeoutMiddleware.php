@@ -9,7 +9,7 @@ use Illuminate\Events\Dispatcher;
 use Illuminate\Session\SessionManager;
 use JulioMotol\AuthTimeout\Events\AuthTimeoutEvent;
 
-class AuthTimeoutMiddleWare
+class AuthTimeoutMiddleware
 {
     /**
      * The Authentication Manager.
@@ -71,10 +71,10 @@ class AuthTimeoutMiddleWare
             $this->session->put($session_name, time());
         }
 
-        // Now lets check if they have been idle for the timeout duration. If 
+        // Now lets check if they have been idle for the timeout duration. If
         // so we'll log them out, dispatch an event, invalidate the session
         // we've set, and throw and AuthenticationException.
-        if ((time() - (int)$this->session->get($session_name)) > (config('auth-timeout.timeout') * 60)) {
+        if ((time() - (int) $this->session->get($session_name)) > (config('auth-timeout.timeout') * 60)) {
             $user = $this->auth->guard($guard)->user();
 
             $this->auth->guard($guard)->logout();

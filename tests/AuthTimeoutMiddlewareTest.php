@@ -3,18 +3,11 @@
 namespace JulioMotol\AuthTimeout\Tests;
 
 use Illuminate\Auth\AuthenticationException;
-use Illuminate\Auth\AuthManager;
-use Illuminate\Events\Dispatcher;
 use Illuminate\Http\Request;
-use Illuminate\Session\SessionManager;
-use Illuminate\Session\Store;
-use Illuminate\Support\Str;
 use JulioMotol\AuthTimeout\Events\AuthTimeoutEvent;
-use JulioMotol\AuthTimeout\Middleware\AuthTimeoutMiddleWare;
+use JulioMotol\AuthTimeout\Middleware\AuthTimeoutMiddleware;
 use JulioMotol\AuthTimeout\Tests\Models\User;
-use JulioMotol\AuthTimeout\Tests\TestCase;
 use Mockery;
-use Mockery\Mock;
 
 class AuthTimeoutMiddlewareTest extends TestCase
 {
@@ -115,7 +108,7 @@ class AuthTimeoutMiddlewareTest extends TestCase
             $nextParam = $param;
         };
 
-        (new AuthTimeoutMiddleWare($this->auth, $this->event, $this->session))->handle($request, $next);
+        (new AuthTimeoutMiddleware($this->auth, $this->event, $this->session))->handle($request, $next);
 
         $this->assertSame($request, $nextParam);
     }

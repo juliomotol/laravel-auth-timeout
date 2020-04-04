@@ -12,7 +12,7 @@ class ServiceProvider extends BaseServiceProvider
             __DIR__.'/../config/auth-timeout.php' => config_path('auth-timeout.php'),
         ]);
     }
-    
+
     public function register()
     {
         $this->mergeConfigFrom(__DIR__.'/../config/auth-timeout.php', 'auth-timeout');
