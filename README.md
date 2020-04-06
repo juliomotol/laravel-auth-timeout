@@ -50,10 +50,12 @@ php artisan vendor:publish --provider="JulioMotol\AuthTimeout\ServiceProvider"
 For a simple usage, include the `AuthTimeoutMiddleware` in your `Kernel.php`
 
 ```php
-protected $middleware = [
-    ...
-    \JulioMotol\AuthTimeout\Middleware\AuthTimeoutMiddleware::class,
-    ...
+protected $middlewareGroups = [
+    'web' => [
+        ...
+        \JulioMotol\AuthTimeout\Middleware\AuthTimeoutMiddleware::class,
+        ...
+    ],
 ];
 ```
 
