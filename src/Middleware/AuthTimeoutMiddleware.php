@@ -52,7 +52,7 @@ class AuthTimeoutMiddleware
      * @param  \Illuminate\Http\Request  $request
      * @param  \Closure  $next
      * @param  string  $guard
-     * 
+     *
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws Illuminate\Auth\AuthenticationException
      */
@@ -96,7 +96,7 @@ class AuthTimeoutMiddleware
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  mixed    $guard
-     * 
+     *
      * @return string|null
      */
     protected function redirectTo($request, $guard)
