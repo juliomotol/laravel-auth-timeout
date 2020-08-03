@@ -7,6 +7,8 @@
 
 A small Laravel 6+ package that handles Authentication Timeouts.
 
+When upgrading to v2, please see the [CHANGELOG.md](./CHANGELOG.md).
+
 ## Why Laravel Auth Timeout?
 
 There are times where we want to log out a user when they haven't done and request in a set of time. There is a workaround (below):
