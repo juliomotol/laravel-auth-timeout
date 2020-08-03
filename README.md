@@ -10,11 +10,10 @@ A small Laravel 6+ package that handles Authentication Timeouts.
 ## Why Laravel Auth Timeout?
 
 There are times where we want to log out a user when they haven't done and request in a set of time. There is a workaround (below):
-
-    /* config/session.php */
-
-    'lifetime' => 15,
-
+```
+/* somewhere in config/session.php */
+'lifetime' => 15,
+```
 But this also affects the CSRF token and we don't want that. That is where Laravel Auth Timeout comes in.
 
 Laravel Auth Timeout is a small middleware package that checks if the user had made any request in a set of time. If they have reached the idle time limit, they are then logged out. Thanks to Brian Matovu's [article](http://bmatovu.com/laravel-session-timeout-auto-logout/).
@@ -37,26 +36,32 @@ php artisan vendor:publish --provider="JulioMotol\AuthTimeout\ServiceProvider"
 
 ### Content of the configuration
 
-| Key      | Default value          | Description                                                                                         |
-| -------- | ---------------------- | --------------------------------------------------------------------------------------------------- |
-| session  | `"last_activity_time"` | The name of the session token to be used.                                                           |
-| timeout  | `15`                   | The timeout duration in minutes.                                                                    |
-| redirect | `null`                 | The path to redirect the user when timed out. (For more flexibilty, see [Redirection](#redirection))|
+| Key      | Default value          | Description                                                                                          |
+| -------- | ---------------------- | ---------------------------------------------------------------------------------------------------- |
+| session  | `"last_activity_time"` | The name of the session token to be used.                                                            |
+| timeout  | `15`                   | The timeout duration in minutes.                                                                     |
+| redirect | `null`                 | The path to redirect the user when timed out. (For more flexibilty, see [Redirection](#redirection)) |
 
 ## Usage
 
 ### Quick Start
 
-For a simple usage, include the `AuthTimeoutMiddleware` in your `Kernel.php`
+For a simple usage, include the `AuthTimeoutMiddleware` in your `Kernel.php` and use that middleware on the route you want this to take effect in.
 
 ```php
-protected $middlewareGroups = [
-    'web' => [
-        ...
-        \JulioMotol\AuthTimeout\Middleware\AuthTimeoutMiddleware::class,
-        ...
-    ],
+/* Kernel.php */
+
+protected $routeMiddleware = [
+    ...
+    'auth.timeout' => \JulioMotol\AuthTimeout\Middleware\AuthTimeoutMiddleware::class,
+    ...
 ];
+
+/* Routes.php */
+Route::get('/admin', [
+    'uses' => 'FooBarController@Foobar',
+    'middleware' => ['auth.timeout']
+]);
 ```
 
 As simple as that.
@@ -68,22 +73,14 @@ You might have multiple guards and only want to apply `AuthTimeoutMiddleware` to
 ```php
 // Lets say you have added a 'web.admin' guard in your config/auth.php...
 
-/*Kernel.php*/
-
-protected $routeMiddleware = [
-    ...
-    'auth.timeout' => \JulioMotol\AuthTimeout\Middleware\AuthTimeoutMiddleware::class,
-    ...
-];
-
 /* Routes.php */
 Route::get('/admin', [
     'uses' => 'FooBarController@Foobar',
-    'middleware' => ['auth.timeout:web.admin']
+    'middleware' => ['auth.timeout:web.admin'] // Add the guard name as a parameter for the auth.timeout middleware.
 ]);
 ```
 
-> NOTE: This package only works with guards that uses 'session' as its driver
+> NOTE: This package only works with guards that uses "session" as its driver
 
 ### AuthTimeoutEvent
 
@@ -95,6 +92,19 @@ protected $listen = [
         // Your Listeners...
     ],
 ];
+```
+
+`AuthTimeoutEvent` has two properties that you can access in your `EventListener`
+
+```php
+class FooEventListener
+{
+    public function handle(AuthTimeoutEvent $event)
+    {        
+        $event->user;   // The user that timed out.
+        $event->guard;  // The authentication guard.
+    }
+}
 ```
 
 ### Redirection
@@ -114,14 +124,18 @@ class AuthTimeoutMiddleware extends BaseMiddleware
      * Get the path the user should be redirected to when they timed out.
      *
      * @param  \Illuminate\Http\Request  $request
+     * @param  mixed    $guard
+     * 
      * @return string|null
      */
-    protected function redirectTo($request)
+    protected function redirectTo($request, $guard = null)
     {
         //
     }
 }
 ```
+
+If you have multiple guards, you can use the `$guard` parameter to determine how and where a certain guard should be redirected.
 
 ## Contributing
 
@@ -133,9 +147,9 @@ Please read and understand the contribution guide before creating an issue or pu
 
 Before submitting a pull request:
 
-- Make sure to write tests!
-- Document any change in behaviour. Make sure the `README.md` and any other relevant documentation are kept up-to-date.
-- One pull request per feature. If you want to do more than one thing, send multiple pull requests.
+-   Make sure to write tests!
+-   Document any change in behaviour. Make sure the `README.md` and any other relevant documentation are kept up-to-date.
+-   One pull request per feature. If you want to do more than one thing, send multiple pull requests.
 
 ## License
 
