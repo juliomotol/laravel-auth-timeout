@@ -52,6 +52,7 @@ class AuthTimeoutMiddleware
      * @param  \Illuminate\Http\Request  $request
      * @param  \Closure  $next
      * @param  string  $guard
+     * 
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws Illuminate\Auth\AuthenticationException
      */
@@ -83,7 +84,7 @@ class AuthTimeoutMiddleware
 
             $this->session->forget($session_name);
 
-            throw new AuthenticationException('Timed out.', [$guard], $this->redirectTo($request));
+            throw new AuthenticationException('Timed out.', [$guard], $this->redirectTo($request, $guard));
         }
 
         // Refresh our session with the current time.
@@ -96,9 +97,11 @@ class AuthTimeoutMiddleware
      * Get the path the user should be redirected to when they timed out.
      *
      * @param  \Illuminate\Http\Request  $request
+     * @param  mixed    $guard
+     * 
      * @return string|null
      */
-    protected function redirectTo($request)
+    protected function redirectTo($request, $guard)
     {
         return config('auth-timeout.redirect');
     }
