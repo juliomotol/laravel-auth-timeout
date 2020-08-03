@@ -16,13 +16,21 @@ class AuthTimeoutEvent
     public $user;
 
     /**
+     * The authentication guard that timed out.
+     *
+     * @var mixed
+     */
+    public $guard;
+
+    /**
      * Create a new event instance.
      *
      * @param  \Illuminate\Contracts\Auth\Authenticatable  $user
      * @return void
      */
-    public function __construct($user)
+    public function __construct($user, $guard)
     {
         $this->user = $user;
+        $this->guard = $guard;
     }
 }

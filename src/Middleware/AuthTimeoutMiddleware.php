@@ -79,9 +79,7 @@ class AuthTimeoutMiddleware
             $user = $this->auth->guard($guard)->user();
 
             $this->auth->guard($guard)->logout();
-
-            $this->event->dispatch(new AuthTimeoutEvent($user));
-
+            $this->event->dispatch(new AuthTimeoutEvent($user, $guard));
             $this->session->forget($session_name);
 
             throw new AuthenticationException('Timed out.', [$guard], $this->redirectTo($request, $guard));
