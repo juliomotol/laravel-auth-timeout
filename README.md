@@ -12,13 +12,26 @@ When upgrading to v2, please see the [CHANGELOG.md](./CHANGELOG.md).
 ## Why Laravel Auth Timeout?
 
 There are times where we want to log out a user when they haven't done and request in a set of time. There is a workaround (below):
+
 ```
-/* somewhere in config/session.php */
+/* Somewhere in config/session.php */
 'lifetime' => 15,
 ```
+
 But this also affects the CSRF token and we don't want that. That is where Laravel Auth Timeout comes in.
 
-Laravel Auth Timeout is a small middleware package that checks if the user had made any request in a set of time. If they have reached the idle time limit, they are then logged out. Thanks to Brian Matovu's [article](http://bmatovu.com/laravel-session-timeout-auto-logout/).
+Laravel Auth Timeout is a small middleware package that checks if the user had made any request in a set of time. If they have reached the idle time limit, they are then logged out on their next request. Thanks to Brian Matovu's [article](http://bmatovu.com/laravel-session-timeout-auto-logout/).
+
+## Tables of Contents
+
+-   [Installation](#installation)
+-   [Config](#config)
+    -   [Content of the configuration](#content-of-the-configuration)
+-   [Usage](#usage)
+    -   [Quick Start](#quick-start)
+    -   [Custom Guards](#custom-guards)
+    -   [AuthTimeoutEvent](#authtimeoutevent)
+    -   [Redirection](#redirection)
 
 ## Installation
 
@@ -26,7 +39,7 @@ Laravel Auth Timeout is a small middleware package that checks if the user had m
 composer require juliomotol/laravel-auth-timeout
 ```
 
-This package uses [auto-discovery](https://laravel.com/docs/5.5/packages#package-discovery), so you don't have to do anything. It works out of the box.
+> This package uses [auto-discovery](https://laravel.com/docs/5.5/packages#package-discovery), so you don't have to do anything. It works out of the box.
 
 ## Config
 
@@ -66,8 +79,6 @@ Route::get('/admin', [
 ]);
 ```
 
-As simple as that.
-
 ### Custom Guards
 
 You might have multiple guards and only want to apply `AuthTimeoutMiddleware` to certain ones. We got you covered, `AuthTimeoutMiddleware` accepts a `$guard` as its parameter.
@@ -82,11 +93,11 @@ Route::get('/admin', [
 ]);
 ```
 
-> NOTE: This package only works with guards that uses "session" as its driver
+> This package only works with guards that uses `session` as its driver
 
 ### AuthTimeoutEvent
 
-The `AuthTimeoutMiddleware` also dispatches an `AuthTimeoutEvent` every time a user has timed out. You can assign a listener for this event in your `EventServiceProvider`
+The `AuthTimeoutMiddleware` will dispatch an `AuthTimeoutEvent` every time a user has timed out. You can assign a listener for this event in your `EventServiceProvider`.
 
 ```php
 protected $listen = [
@@ -96,13 +107,13 @@ protected $listen = [
 ];
 ```
 
-`AuthTimeoutEvent` has two properties that you can access in your `EventListener`
+`AuthTimeoutEvent` has two properties that you can access in your `EventListener`.
 
 ```php
 class FooEventListener
 {
     public function handle(AuthTimeoutEvent $event)
-    {        
+    {
         $event->user;   // The user that timed out.
         $event->guard;  // The authentication guard.
     }
@@ -111,7 +122,9 @@ class FooEventListener
 
 ### Redirection
 
-You might find the `redirect` option in the config a bit less flexible. You can extend the `AuthTimeoutMiddleware` then override the `redirectTo()` method.
+For a simple and straight forward redirection, you can [publish the config file](#config) and change the `redirect` option to where you want to redirect the user when they timed out.
+
+Alternatively, you can extend the `AuthTimeoutMiddleware` then override the `redirectTo()` method to provide much flexibility.
 
 ```php
 <?php
@@ -127,17 +140,22 @@ class AuthTimeoutMiddleware extends BaseMiddleware
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  mixed    $guard
-     * 
+     *
      * @return string|null
      */
     protected function redirectTo($request, $guard = null)
     {
-        //
+        switch($guard){
+            case 'web.admin':
+                return route('auth.admin.login');
+            default:
+                return route('auth.login');
+        }
     }
 }
 ```
 
-If you have multiple guards, you can use the `$guard` parameter to determine how and where a certain guard should be redirected.
+> Don't forget to use your extended `AuthTimeoutMiddleware` in the `Kernel.php`.
 
 ## Contributing
 
