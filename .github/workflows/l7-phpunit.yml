@@ -1,4 +1,4 @@
-name: Run PHPUnit tests
+name: Run Laravel 7.x tests
 
 on:
     push:
@@ -15,14 +15,9 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                php: [7.4, 7.3, 7.2]
-                laravel: [7.*, 6.*]
+                php: [7.4, 7.3, 7.2.5]
+                laravel: [7.*]
                 dependency: [prefer-lowest, prefer-stable]
-                include:
-                    - laravel: 7.*
-                      testbench: 5.*
-                    - laravel: 6.*
-                      testbench: 4.*
 
         name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.dependency }}
 
@@ -45,7 +40,7 @@ jobs:
 
             - name: Install dependencies
               run: |
-                  composer require "illuminate/support:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
+                  composer require "illuminate/support:${{ matrix.laravel }}" "orchestra/testbench:5.*" --no-interaction --no-update
                   composer update --${{ matrix.dependency }} --prefer-dist --no-interaction --no-suggest
             - name: Execute tests
               run: vendor/bin/phpunit
