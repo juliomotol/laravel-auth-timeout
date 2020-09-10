@@ -11,15 +11,15 @@ on:
 jobs:
     tests:
         steps:
-          - name: Test Laravel 6.x
-            uses: ../actions/test.matrix.yml
+          - name: Test Laravel 6.x Test Matrix
+            uses: ./.github/actions/laravel-package-test-matrix
             with:
                 php: [7.2, 7.3]
                 laravel: [6.*]
                 dependency: [prefer-stable]
 
-          - name: Test Laravel 7.x
-            uses: ../actions/test.matrix.yml
+          - name: Test Laravel 7.x Test Matrix
+            uses: ./.github/actions/laravel-package-test-matrix
             with:
                 php: [7.2.5, 7.3, 7.4]
                 laravel: [7.*]
