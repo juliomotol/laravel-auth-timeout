@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.1.0 (2020-09-11)
+
+-   Added support for Laravel 8.x
+
 ## v2.0.0 (2020-08-03)
 
 ### Breaking Changes
