@@ -1,4 +1,4 @@
-name: Run Laravel 7.x tests
+name: Run Laravel 8.x tests
 
 on:
     push:
@@ -40,7 +40,7 @@ jobs:
 
             - name: Install dependencies
               run: |
-                  composer require "illuminate/support:${{ matrix.laravel }}" "orchestra/testbench:5.*" --no-interaction --no-update
+                  composer require "illuminate/support:${{ matrix.laravel }}" "orchestra/testbench:6.*" --no-interaction --no-update
                   composer update --${{ matrix.dependency }} --prefer-dist --no-interaction --no-suggest
             - name: Execute tests
               run: vendor/bin/phpunit
