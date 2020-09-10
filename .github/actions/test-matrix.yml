@@ -1,0 +1,51 @@
+name: "Laravel Package Test Matrix"
+author: "Julio Motol"
+inputs:
+    php:
+        description: "The PHP version matrices"
+        required: true
+    laravel:
+        description: "The Laravel version matrices"
+        required: true
+    dependency:
+        description: "The dependency preferrence"
+        default: [prefer-lowest, prefer-stable]
+runs:
+    using: "composite"
+    strategy:
+        fail-fast: false
+        matrix:
+            php: INPUT_PHP
+            laravel: INPUT_LARAVEL
+            dependency: INPUT_DEPENDENCY
+            include:
+                - laravel: 7.*
+                  testbench: 5.*
+                - laravel: 6.*
+                  testbench: 4.*
+
+    name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.dependency }}
+
+    steps:
+        - name: Checkout code
+          uses: actions/checkout@v1
+
+        - name: Cache dependencies
+          uses: actions/cache@v1
+          with:
+              path: ~/.composer/cache/files
+              key: dependencies-laravel-${{ matrix.laravel }}-php-${{ matrix.php }}-composer-${{ hashFiles('composer.json') }}
+
+        - name: Setup PHP
+          uses: shivammathur/setup-php@v1
+          with:
+              php-version: ${{ matrix.php }}
+              extension: dom, curl, libxml, mbstring, pcntl, bcmath, intl, gd, exif, iconv
+              coverage: none
+
+        - name: Install dependencies
+          run: |
+              composer require "illuminate/support:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
+              composer update --${{ matrix.dependency }} --prefer-dist --no-interaction --no-suggest
+        - name: Execute tests
+          run: vendor/bin/phpunit
