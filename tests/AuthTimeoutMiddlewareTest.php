@@ -93,7 +93,10 @@ class AuthTimeoutMiddlewareTest extends TestCase
 
     private function hasAuth()
     {
-        $user = Mockery::spy(User::class);
+        $user = new User([
+            'id' => 1,
+            'name' => 'Unit Test User'
+        ]);
 
         $this->actingAs($user);
     }
