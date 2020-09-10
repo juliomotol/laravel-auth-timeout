@@ -6,7 +6,7 @@ use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\Request;
 use JulioMotol\AuthTimeout\Events\AuthTimeoutEvent;
 use JulioMotol\AuthTimeout\Middleware\AuthTimeoutMiddleware;
-use JulioMotol\AuthTimeout\Tests\Models\User;
+use JulioMotol\AuthTimeout\Tests\User;
 use Mockery;
 
 class AuthTimeoutMiddlewareTest extends TestCase

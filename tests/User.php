@@ -1,6 +1,6 @@
 <?php
 
-namespace JulioMotol\AuthTimeout\Tests\Models;
+namespace JulioMotol\AuthTimeout\Tests;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
