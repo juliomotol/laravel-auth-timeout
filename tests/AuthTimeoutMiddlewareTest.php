@@ -93,10 +93,7 @@ class AuthTimeoutMiddlewareTest extends TestCase
 
     private function hasAuth()
     {
-        $user = new User([
-            'id' => 1,
-            'name' => 'Unit Test User'
-        ]);
+        $user = new User(['name' => 'Unit Test User']);
 
         $this->actingAs($user);
     }
