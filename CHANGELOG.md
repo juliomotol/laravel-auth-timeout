@@ -1,8 +1,12 @@
 # Changelog
 
+## v2.2.0 (2020-10-12)
+
+-   Added `AuthTimeout` facade.
+
 ## v2.1.0 (2020-09-11)
 
--   Added support for Laravel 8.x
+-   Added support for Laravel 8.x.
 
 ## v2.0.0 (2020-08-03)
 

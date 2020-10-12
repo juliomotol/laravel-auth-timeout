@@ -32,6 +32,7 @@ Laravel Auth Timeout is a small middleware package that checks if the user had m
     -   [Custom Guards](#custom-guards)
     -   [AuthTimeoutEvent](#authtimeoutevent)
     -   [Redirection](#redirection)
+    -   [AuthTimeout Facade](#authtimeout-facade)
 
 ## Installation
 
@@ -156,6 +157,14 @@ class AuthTimeoutMiddleware extends BaseMiddleware
 ```
 
 > Don't forget to use your extended `AuthTimeoutMiddleware` in the `Kernel.php`.
+
+### AuthTimeout Facade
+
+This package also provides a facade with the following methods:
+
+-   `AuthTimeout::init()` - Initialize the timeout session when no has been set yet.
+-   `AuthTimeout::check($guard = null)` - Check if a user has timed out and logs them out if so.
+-   `AuthTimeout::reset()` - Reset the user's timeout session.
 
 ## Contributing
 
