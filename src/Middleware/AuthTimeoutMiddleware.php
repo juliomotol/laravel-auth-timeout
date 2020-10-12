@@ -5,9 +5,7 @@ namespace JulioMotol\AuthTimeout\Middleware;
 use Closure;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Auth\AuthManager;
-use Illuminate\Events\Dispatcher;
-use Illuminate\Session\SessionManager;
-use JulioMotol\AuthTimeout\Events\AuthTimeoutEvent;
+use JulioMotol\AuthTimeout\Contracts\AuthTimeout;
 
 class AuthTimeoutMiddleware
 {
@@ -19,31 +17,22 @@ class AuthTimeoutMiddleware
     protected $auth;
 
     /**
-     * The Event Dispatcher.
+     * The AuthTimeout instance.
      *
-     * @var \Illuminate\Events\Dispatcher
+     * @var \JulioMotol\AuthTimeout\Contracts\AuthTimeout
      */
-    protected $event;
-
-    /**
-     * The Session Manager.
-     *
-     * @var \Illuminate\Session\SessionManager
-     */
-    protected $session;
+    protected $authTimeout;
 
     /**
      * Create an AuthTimeoutMiddleware.
      *
      * @param  \Illuminate\Auth\AuthManager  $auth
-     * @param  \Illuminate\Events\Dispatcher  $event
-     * @param  \Illuminate\Session\SessionManager  $session
+     * @param  \JulioMotol\AuthTimeout\Contracts\AuthTimeout $authTimeout
      */
-    public function __construct(AuthManager $auth, Dispatcher $event, SessionManager $session)
+    public function __construct(AuthManager $auth, AuthTimeout $authTimeout)
     {
         $this->auth = $auth;
-        $this->event = $event;
-        $this->session = $session;
+        $this->authTimeout = $authTimeout;
     }
 
     /**
@@ -58,35 +47,23 @@ class AuthTimeoutMiddleware
      */
     public function handle($request, Closure $next, $guard = null)
     {
-        $session_name = config('auth-timeout.session');
-
         // When there are no user's logged in, just let them pass through
         if ($this->auth->guard($guard)->guest()) {
             return $next($request);
         }
 
-        // At this point we know that every user that reaches here is
-        // authenticated. If they are newly logged in, and no session had been
-        // set yet, lets set that here for now.
-        if (! $this->session->get($session_name)) {
-            $this->session->put($session_name, time());
-        }
+        // First we'll initialize a session when none has been set yet.
+        $this->authTimeout->init();
 
-        // Now lets check if they have been idle for the timeout duration. If
-        // so we'll log them out, dispatch an event, invalidate the session
-        // we've set, and throw and AuthenticationException.
-        if ((time() - (int) $this->session->get($session_name)) > (config('auth-timeout.timeout') * 60)) {
-            $user = $this->auth->guard($guard)->user();
-
-            $this->auth->guard($guard)->logout();
-            $this->event->dispatch(new AuthTimeoutEvent($user, $guard));
-            $this->session->forget($session_name);
-
+        // Then we'll check if the user have timed out. If so, we'll throw an
+        // AuthenticationException.
+        if (!$this->authTimeout->check($guard)) {
             throw new AuthenticationException('Timed out.', [$guard], $this->redirectTo($request, $guard));
         }
 
-        // Refresh our session with the current time.
-        $this->session->put($session_name, time());
+        // If the user is not yet timed out, we'll reset the timeout session
+        // and proceed with the pipeline.
+        $this->authTimeout->reset();
 
         return $next($request);
     }

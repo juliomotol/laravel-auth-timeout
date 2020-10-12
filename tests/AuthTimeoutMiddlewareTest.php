@@ -107,7 +107,10 @@ class AuthTimeoutMiddlewareTest extends TestCase
             $nextParam = $param;
         };
 
-        (new AuthTimeoutMiddleware($this->auth, $this->event, $this->session))->handle($request, $next);
+        (new AuthTimeoutMiddleware(
+            $this->auth,
+            $this->app[\JulioMotol\AuthTimeout\Contracts\AuthTimeout::class]
+        ))->handle($request, $next);
 
         $this->assertSame($request, $nextParam);
     }
