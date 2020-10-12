@@ -21,7 +21,5 @@ class ServiceProvider extends BaseServiceProvider
         $this->app->singleton(AuthTimeoutContract::class, function ($app) {
             return new AuthTimeout($app['auth'], $app['events'], $app['session']);
         });
-
-        $this->app->alias(AuthTimeoutContract::class, 'AuthTimeout');
     }
 }

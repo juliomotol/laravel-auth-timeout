@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.2.1 (2020-10-12)
+
+-   Fixed `AuthTimeout` facade.
+
 ## v2.2.0 (2020-10-12)
 
 -   Added `AuthTimeout` facade.

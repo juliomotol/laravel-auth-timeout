@@ -16,6 +16,6 @@ class AuthTimeout extends Facade
 {
     protected static function getFacadeAccessor()
     {
-        throw AuthTimeoutContract::class;
+        return AuthTimeoutContract::class;
     }
 }
