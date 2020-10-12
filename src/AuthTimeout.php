@@ -33,7 +33,7 @@ class AuthTimeout implements AuthTimeoutContract
 
     /**
      * The session key.
-     * 
+     *
      * @var string
      */
     protected $session_name;
@@ -56,17 +56,17 @@ class AuthTimeout implements AuthTimeoutContract
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function init()
     {
         // When no session had been set yet, we'll set one now.
-        if (!$this->session->get($this->session_name)) {
+        if (! $this->session->get($this->session_name)) {
             $this->session->put($this->session_name, time());
         }
     }
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function check($guard = null)
     {
@@ -94,7 +94,7 @@ class AuthTimeout implements AuthTimeoutContract
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function reset()
     {

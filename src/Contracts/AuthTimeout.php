@@ -6,14 +6,14 @@ interface AuthTimeout
 {
     /**
      * Initialize the timeout session when no has been set yet.
-     * 
+     *
      * @return void;
      */
     public function init();
 
     /**
-     * Check if a user has timed out. Returns `true` if not yet timed out and `false` otherwise. 
-     * 
+     * Check if a user has timed out. Returns `true` if not yet timed out and `false` otherwise.
+     *
      * @param mixed $guard
      * 
      * @return bool
@@ -22,7 +22,7 @@ interface AuthTimeout
 
     /**
      * Reset the user's timeout session.
-     * 
+     *
      * @return void
      */
     public function reset();

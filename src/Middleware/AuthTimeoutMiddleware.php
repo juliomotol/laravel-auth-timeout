@@ -57,7 +57,7 @@ class AuthTimeoutMiddleware
 
         // Then we'll check if the user have timed out. If so, we'll throw an
         // AuthenticationException.
-        if (!$this->authTimeout->check($guard)) {
+        if (! $this->authTimeout->check($guard)) {
             throw new AuthenticationException('Timed out.', [$guard], $this->redirectTo($request, $guard));
         }
 

@@ -18,7 +18,7 @@ abstract class TestCase extends Orchestra
     protected function getPackageAliases($app)
     {
         return [
-            'AuthTimeout' => AuthTimeout::class
+            'AuthTimeout' => AuthTimeout::class,
         ];
     }
 }
