@@ -15,7 +15,7 @@ interface AuthTimeout
      * Check if a user has timed out. Returns `true` if not yet timed out and `false` otherwise.
      *
      * @param mixed $guard
-     * 
+     *
      * @return bool
      */
     public function check($guard = null);

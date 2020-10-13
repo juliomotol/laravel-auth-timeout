@@ -65,6 +65,7 @@ class AuthTimeout implements AuthTimeoutContract
             $this->session->put($this->session_name, time());
         }
     }
+
     /**
      * {@inheritdoc}
      */
