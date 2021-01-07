@@ -6,7 +6,7 @@ use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\Request;
 use JulioMotol\AuthTimeout\Events\AuthTimeoutEvent;
 use JulioMotol\AuthTimeout\Middleware\AuthTimeoutMiddleware;
-use Mockery;
+use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 
 class AuthTimeoutMiddlewareTest extends TestCase
 {
@@ -99,19 +99,16 @@ class AuthTimeoutMiddlewareTest extends TestCase
 
     private function runMiddleware()
     {
-        $request = Mockery::mock(Request::class);
+        $middleware = app(AuthTimeoutMiddleware::class);
+        $symfonyRequest = new SymfonyRequest([
+            'foo' => 'bar',
+            'baz' => '',
+        ]);
+        $symfonyRequest->server->set('REQUEST_METHOD', 'GET');
+        $request = Request::createFromBase($symfonyRequest);
 
-        $nextParam = null;
-
-        $next = function ($param) use (&$nextParam) {
-            $nextParam = $param;
-        };
-
-        (new AuthTimeoutMiddleware(
-            $this->auth,
-            $this->app[\JulioMotol\AuthTimeout\Contracts\AuthTimeout::class]
-        ))->handle($request, $next);
-
-        $this->assertSame($request, $nextParam);
+        $middleware->handle($request, function (Request $newRequest) use ($request) {
+            $this->assertSame($request, $newRequest);
+        });
     }
 }
