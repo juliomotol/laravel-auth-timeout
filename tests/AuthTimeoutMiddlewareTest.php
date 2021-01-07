@@ -2,7 +2,9 @@
 
 namespace JulioMotol\AuthTimeout\Tests;
 
+use Carbon\Carbon;
 use Illuminate\Auth\AuthenticationException;
+use Illuminate\Foundation\Testing\Concerns\InteractsWithTime;
 use Illuminate\Http\Request;
 use JulioMotol\AuthTimeout\Events\AuthTimeoutEvent;
 use JulioMotol\AuthTimeout\Middleware\AuthTimeoutMiddleware;
@@ -10,6 +12,8 @@ use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 
 class AuthTimeoutMiddlewareTest extends TestCase
 {
+    use InteractsWithTime;
+
     /**
      * @var \Illuminate\Auth\AuthManager
      */
@@ -53,7 +57,7 @@ class AuthTimeoutMiddlewareTest extends TestCase
         $this->hasAuth();
         $this->runMiddleware();
 
-        $this->assertEquals(time(), $this->session->get(config('auth-timeout.session')));
+        $this->assertEquals((string)Carbon::now(), $this->session->get(config('auth-timeout.session')));
     }
 
     /** @test */
@@ -64,7 +68,7 @@ class AuthTimeoutMiddlewareTest extends TestCase
         $this->hasAuth();
         $this->runMiddleware();
 
-        sleep(2);
+        $this->travel(config('auth-timeout.timeout') - 1)->minutes();
 
         $this->runMiddleware();
 
@@ -74,19 +78,17 @@ class AuthTimeoutMiddlewareTest extends TestCase
     /** @test */
     public function should_timeout_when_idled()
     {
-        config(['auth-timeout.timeout' => 0.05]);
-
         $this->expectException(AuthenticationException::class);
 
         $this->hasAuth();
         $this->runMiddleware();
 
-        sleep(5);
+        $this->travel(config('auth-timeout.timeout') + 1)->minutes();
 
         $this->runMiddleware();
 
-        $this->assertNull($this->auth->user());
         $this->expectsEvents(AuthTimeoutEvent::class);
+        $this->assertNull($this->auth->user());
         $this->assertNull($this->session->get(config('auth-timeout.session')));
     }
 

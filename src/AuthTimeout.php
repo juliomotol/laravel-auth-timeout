@@ -2,6 +2,7 @@
 
 namespace JulioMotol\AuthTimeout;
 
+use Carbon\Carbon;
 use Illuminate\Auth\AuthManager;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Session\SessionManager;
@@ -52,7 +53,6 @@ class AuthTimeout implements AuthTimeoutContract
         $this->session = $session;
 
         $this->session_name = config('auth-timeout.session');
-        $this->timeout = config('auth-timeout.timeout') * 60;
     }
 
     /**
@@ -62,7 +62,7 @@ class AuthTimeout implements AuthTimeoutContract
     {
         // When no session had been set yet, we'll set one now.
         if (! $this->session->get($this->session_name)) {
-            $this->session->put($this->session_name, time());
+            $this->reset();
         }
     }
 
@@ -76,9 +76,11 @@ class AuthTimeout implements AuthTimeoutContract
             return false;
         }
 
-        // Now lets check if they are still within the timeout. If so, return
-        // true.
-        if ((time() - (int) $this->session->get($this->session_name)) < $this->timeout) {
+        $lastActiveAt = Carbon::parse($this->session->get($this->session_name));
+        $timeoutAt = $lastActiveAt->addMinutes(config('auth-timeout.timeout'));
+
+        // Now lets check if they are still within the timeout threshold.
+        if ($timeoutAt->greaterThan(Carbon::now())) {
             return true;
         }
 
@@ -99,6 +101,6 @@ class AuthTimeout implements AuthTimeoutContract
      */
     public function reset()
     {
-        $this->session->put($this->session_name, time());
+        $this->session->put($this->session_name, (string)Carbon::now());
     }
 }
