@@ -43,7 +43,7 @@ class AuthTimeoutMiddleware
      * @param  string  $guard
      *
      * @throws Illuminate\Auth\AuthenticationException
-     * 
+     *
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function handle($request, Closure $next, $guard = null)
