@@ -26,16 +26,4 @@ return [
 
     'timeout' => 15,
 
-    /*
-    |--------------------------------------------------------------------------
-    | Timeout Redirection
-    |--------------------------------------------------------------------------
-    |
-    | Here you may specify the path to where the user will be redirected when
-    | they have timed out.
-    |
-    */
-
-    'redirect' => null,
-
 ];

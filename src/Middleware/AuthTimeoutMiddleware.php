@@ -74,10 +74,10 @@ class AuthTimeoutMiddleware
      * @param  \Illuminate\Http\Request  $request
      * @param  mixed    $guard
      *
-     * @return string|null
+     * @return mixed
      */
     protected function redirectTo($request, $guard)
     {
-        return config('auth-timeout.redirect');
+        //
     }
 }
