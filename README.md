@@ -1,13 +1,14 @@
 # Laravel Auth Timeout
 
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
-[![StyleCI](https://github.styleci.io/repos/252781961/shield?branch=master)](https://github.styleci.io/repos/252781961)
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/juliomotol/laravel-auth-timeout.svg?style=flat-square)](https://packagist.org/packages/juliomotol/laravel-auth-timeout)
 [![Total Downloads](https://img.shields.io/packagist/dt/juliomotol/laravel-auth-timeout.svg?style=flat-square)](https://packagist.org/packages/juliomotol/laravel-auth-timeout)
 
-A small Laravel 6+ package that handles Authentication Timeouts.
+A small Laravel 8 package that handles Authentication Timeouts.
 
-When upgrading to v2, please see the [CHANGELOG.md](./CHANGELOG.md).
+When upgrading to v3, please see the [CHANGELOG.md](./CHANGELOG.md).
+
+> For Laravel 6+ support, see [v2](https://github.com/juliomotol/laravel-auth-timeout/tree/v2).
 
 ## Why Laravel Auth Timeout?
 
@@ -52,11 +53,10 @@ php artisan vendor:publish --provider="JulioMotol\AuthTimeout\ServiceProvider"
 
 ### Content of the configuration
 
-| Key      | Default value          | Description                                                                                          |
-| -------- | ---------------------- | ---------------------------------------------------------------------------------------------------- |
-| session  | `"last_activity_time"` | The name of the session token to be used.                                                            |
-| timeout  | `15`                   | The timeout duration in minutes.                                                                     |
-| redirect | `null`                 | The path to redirect the user when timed out. (For more flexibilty, see [Redirection](#redirection)) |
+| Key     | Default value          | Description                               |
+| ------- | ---------------------- | ----------------------------------------- |
+| session | `"last_activity_time"` | The name of the session token to be used. |
+| timeout | `15`                   | The timeout duration in minutes.          |
 
 ## Usage
 
@@ -98,7 +98,7 @@ Route::get('/admin', [
 
 ### AuthTimeoutEvent
 
-The `AuthTimeoutMiddleware` will dispatch an `AuthTimeoutEvent` every time a user has timed out. You can assign a listener for this event in your `EventServiceProvider`.
+An `AuthTimeoutEvent` will dispatch every time a user has timed out. You can assign a listener for this event in your `EventServiceProvider`.
 
 ```php
 protected $listen = [
@@ -123,9 +123,7 @@ class FooEventListener
 
 ### Redirection
 
-For a simple and straight forward redirection, you can [publish the config file](#config) and change the `redirect` option to where you want to redirect the user when they timed out.
-
-Alternatively, you can extend the `AuthTimeoutMiddleware` then override the `redirectTo()` method to provide much flexibility.
+To modify the redirection when a user has timed out, you'll need extend the `AuthTimeoutMiddleware` then override the `redirectTo()` method.
 
 ```php
 <?php
@@ -140,9 +138,9 @@ class AuthTimeoutMiddleware extends BaseMiddleware
      * Get the path the user should be redirected to when they timed out.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  mixed    $guard
+     * @param  mixed  $guard
      *
-     * @return string|null
+     * @return mixed
      */
     protected function redirectTo($request, $guard = null)
     {

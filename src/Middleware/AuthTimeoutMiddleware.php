@@ -42,8 +42,9 @@ class AuthTimeoutMiddleware
      * @param  \Closure  $next
      * @param  string  $guard
      *
-     * @return \Symfony\Component\HttpFoundation\Response
      * @throws Illuminate\Auth\AuthenticationException
+     * 
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function handle($request, Closure $next, $guard = null)
     {
@@ -55,8 +56,7 @@ class AuthTimeoutMiddleware
         // First we'll initialize a session when none has been set yet.
         $this->authTimeout->init();
 
-        // Then we'll check if the user have timed out. If so, we'll throw an
-        // AuthenticationException.
+        // Then we'll check if the user have timed out.
         if (! $this->authTimeout->check($guard)) {
             throw new AuthenticationException('Timed out.', [$guard], $this->redirectTo($request, $guard));
         }
