@@ -9,9 +9,11 @@ class ServiceProvider extends BaseServiceProvider
 {
     public function boot()
     {
-        $this->publishes([
-            __DIR__.'/../config/auth-timeout.php' => config_path('auth-timeout.php'),
-        ]);
+        if ($this->app->runningInConsole()) {
+            $this->publishes([
+                __DIR__.'/../config/auth-timeout.php' => config_path('auth-timeout.php'),
+            ], 'config');
+        }
     }
 
     public function register()
