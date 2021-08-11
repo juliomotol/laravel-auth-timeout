@@ -92,6 +92,29 @@ class AuthTimeoutMiddlewareTest extends TestCase
         $this->assertNull($this->session->get(config('auth-timeout.session')));
     }
 
+    /** @test */
+    public function can_modify_redirection()
+    {
+        $this->expectException(AuthenticationException::class);
+
+        $redirectionCallback = fn () => 'test';
+
+        AuthTimeoutMiddleware::setRedirectTo($redirectionCallback);
+
+        $this->hasAuth();
+        $this->runMiddleware();
+
+        $this->travel(config('auth-timeout.timeout') + 1)->minutes();
+
+        try {
+            $this->runMiddleware();
+        } catch (AuthenticationException $exception) {
+            $this->assertSame($redirectionCallback(), $exception->redirectTo());
+
+            throw $exception;
+        }
+    }
+
     private function hasAuth()
     {
         $user = new User(['name' => 'Unit Test User']);

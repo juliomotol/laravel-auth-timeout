@@ -10,6 +10,13 @@ use JulioMotol\AuthTimeout\Contracts\AuthTimeout;
 class AuthTimeoutMiddleware
 {
     /**
+     * The redirection callback.
+     *
+     * @var Closure
+     */
+    public static $redirectToCallback;
+
+    /**
      * The Authentication Manager.
      *
      * @var \Illuminate\Auth\AuthManager
@@ -78,6 +85,20 @@ class AuthTimeoutMiddleware
      */
     protected function redirectTo($request, $guard)
     {
-        //
+        if (self::$redirectToCallback) {
+            return (self::$redirectToCallback)($request, $guard);
+        }
+    }
+
+    /**
+     * Set the redirection callback.
+     *
+     * @param  Closure  $callback
+     *
+     * @return void
+     */
+    public static function setRedirectTo(Closure $callback)
+    {
+        self::$redirectToCallback = $callback;
     }
 }
