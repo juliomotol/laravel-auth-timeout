@@ -97,7 +97,9 @@ class AuthTimeoutMiddlewareTest extends TestCase
     {
         $this->expectException(AuthenticationException::class);
 
-        $redirectionCallback = fn () => 'test';
+        $redirectionCallback = function () {
+            return 'test';
+        };
 
         AuthTimeoutMiddleware::setRedirectTo($redirectionCallback);
 
