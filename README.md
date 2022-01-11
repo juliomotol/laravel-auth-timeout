@@ -123,33 +123,21 @@ class FooEventListener
 
 ### Redirection
 
-To modify the redirection when a user has timed out, you'll need extend the `AuthTimeoutMiddleware` then override the `redirectTo()` method.
+To modify the redirection when a user has timed out, you can use `AuthTimeoutMiddleware::setRedirectTo()` within your `AppServiceProvider` to set a redirection callback.
 
 ```php
-<?php
-
-namespace App\Http\Middleware;
-
-use JulioMotol\AuthTimeout\Middleware\AuthTimeoutMiddleware as BaseMiddleware;
-
-class AuthTimeoutMiddleware extends BaseMiddleware
+class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Get the path the user should be redirected to when they timed out.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  mixed  $guard
-     *
-     * @return mixed
-     */
-    protected function redirectTo($request, $guard = null)
+    public function boot()
     {
-        switch($guard){
-            case 'web.admin':
-                return route('auth.admin.login');
-            default:
-                return route('auth.login');
-        }
+        AuthTimeoutMiddleware::setRedirectTo(function ($request, $guard){
+            switch($guard){
+                case 'web.admin':
+                    return route('auth.admin.login');
+                default:
+                    return route('auth.login');
+            }
+        });
     }
 }
 ```
