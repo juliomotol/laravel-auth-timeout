@@ -11,7 +11,7 @@ class AuthTimeoutEvent
 
     public function __construct(
         public Authenticatable $user,
-        public string $guard
+        public ?string $guard
     ) {
     }
 }

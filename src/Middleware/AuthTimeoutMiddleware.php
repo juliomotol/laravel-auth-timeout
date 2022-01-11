@@ -3,9 +3,9 @@
 namespace JulioMotol\AuthTimeout\Middleware;
 
 use Closure;
-use GuzzleHttp\Psr7\Request;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Auth\AuthManager;
+use Illuminate\Http\Request;
 use JulioMotol\AuthTimeout\Contracts\AuthTimeout;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -22,7 +22,7 @@ class AuthTimeoutMiddleware
     ) {
     }
 
-    public function handle(Request $request, Closure $next, string $guard = null): Response
+    public function handle(Request $request, Closure $next, string $guard = null): ?Response
     {
         // When there are no user's logged in, just let them pass through
         if ($this->auth->guard($guard)->guest()) {
@@ -47,9 +47,9 @@ class AuthTimeoutMiddleware
     /**
      * Get the path the user should be redirected to when they timed out.
      */
-    protected function redirectTo(Request $request, string $guard): ?string
+    protected function redirectTo(Request $request, ?string $guard): ?string
     {
-        if (! self::$redirectToCallback) {
+        if (! isset(self::$redirectToCallback)) {
             return null;
         }
 
