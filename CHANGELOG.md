@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -   Add `AuthTimeoutMiddleware::setRedirectTo()` method.
 
+### Changed
+
+-   Update syntax to PHP8.0.
+
+### Removed
+
+-   Remove support for PHP7.4 and lower.
+
 ## v3.0.1 (2021-01-09)
 
 ### Added
