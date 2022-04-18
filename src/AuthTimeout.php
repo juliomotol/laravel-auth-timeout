@@ -11,57 +11,22 @@ use JulioMotol\AuthTimeout\Events\AuthTimeoutEvent;
 
 class AuthTimeout implements AuthTimeoutContract
 {
-    /**
-     * The Authentication Manager.
-     *
-     * @var \Illuminate\Auth\AuthManager
-     */
-    protected $auth;
+    protected string $session_key;
 
-    /**
-     * The Event Dispatcher.
-     *
-     * @var \Illuminate\Events\Dispatcher
-     */
-    protected $event;
-
-    /**
-     * The Session Manager.
-     *
-     * @var \Illuminate\Session\SessionManager
-     */
-    protected $session;
-
-    /**
-     * The session key.
-     *
-     * @var string
-     */
-    protected $session_name;
-
-    /**
-     * Create an AuthTimeoutMiddleware.
-     *
-     * @param  \Illuminate\Auth\AuthManager  $auth
-     * @param  \Illuminate\Events\Dispatcher  $event
-     * @param  \Illuminate\Session\SessionManager  $session
-     */
-    public function __construct(AuthManager $auth, Dispatcher $event, SessionManager $session)
-    {
-        $this->auth = $auth;
-        $this->event = $event;
-        $this->session = $session;
-
-        $this->session_name = config('auth-timeout.session');
+    public function __construct(
+        protected AuthManager $auth,
+        protected Dispatcher $event,
+        protected SessionManager $session
+    ) {
+        $this->session_key = config('auth-timeout.session');
     }
 
     /**
      * {@inheritdoc}
      */
-    public function init()
+    public function init(): void
     {
-        // When no session had been set yet, we'll set one now.
-        if (! $this->session->get($this->session_name)) {
+        if (! $this->session->get($this->session_key)) {
             $this->reset();
         }
     }
@@ -69,14 +34,14 @@ class AuthTimeout implements AuthTimeoutContract
     /**
      * {@inheritdoc}
      */
-    public function check($guard = null)
+    public function check(string $guard = null): bool
     {
         // When there are no user's logged in, we'll return false.
         if ($this->auth->guard($guard)->guest()) {
             return false;
         }
 
-        $lastActiveAt = Carbon::parse($this->session->get($this->session_name));
+        $lastActiveAt = Carbon::parse($this->session->get($this->session_key));
         $timeoutAt = $lastActiveAt->addMinutes(config('auth-timeout.timeout'));
 
         // Now lets check if they are still within the timeout threshold.
@@ -91,7 +56,7 @@ class AuthTimeout implements AuthTimeoutContract
 
         $this->auth->guard($guard)->logout();
         $this->event->dispatch(new AuthTimeoutEvent($user, $guard));
-        $this->session->forget($this->session_name);
+        $this->session->forget($this->session_key);
 
         return false;
     }
@@ -99,8 +64,8 @@ class AuthTimeout implements AuthTimeoutContract
     /**
      * {@inheritdoc}
      */
-    public function reset()
+    public function reset(): void
     {
-        $this->session->put($this->session_name, (string)Carbon::now());
+        $this->session->put($this->session_key, (string)Carbon::now());
     }
 }

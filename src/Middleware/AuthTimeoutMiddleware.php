@@ -5,48 +5,24 @@ namespace JulioMotol\AuthTimeout\Middleware;
 use Closure;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Auth\AuthManager;
+use Illuminate\Http\Request;
 use JulioMotol\AuthTimeout\Contracts\AuthTimeout;
+use Symfony\Component\HttpFoundation\Response;
 
 class AuthTimeoutMiddleware
 {
-    /**
-     * The Authentication Manager.
-     *
-     * @var \Illuminate\Auth\AuthManager
-     */
-    protected $auth;
-
-    /**
-     * The AuthTimeout instance.
-     *
-     * @var \JulioMotol\AuthTimeout\Contracts\AuthTimeout
-     */
-    protected $authTimeout;
+    public static Closure $redirectToCallback;
 
     /**
      * Create an AuthTimeoutMiddleware.
-     *
-     * @param  \Illuminate\Auth\AuthManager  $auth
-     * @param  \JulioMotol\AuthTimeout\Contracts\AuthTimeout $authTimeout
      */
-    public function __construct(AuthManager $auth, AuthTimeout $authTimeout)
-    {
-        $this->auth = $auth;
-        $this->authTimeout = $authTimeout;
+    public function __construct(
+        public AuthManager $auth,
+        public AuthTimeout $authTimeout
+    ) {
     }
 
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
-     * @param  string  $guard
-     *
-     * @throws Illuminate\Auth\AuthenticationException
-     *
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
-    public function handle($request, Closure $next, $guard = null)
+    public function handle(Request $request, Closure $next, string $guard = null): ?Response
     {
         // When there are no user's logged in, just let them pass through
         if ($this->auth->guard($guard)->guest()) {
@@ -70,14 +46,21 @@ class AuthTimeoutMiddleware
 
     /**
      * Get the path the user should be redirected to when they timed out.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  mixed    $guard
-     *
-     * @return mixed
      */
-    protected function redirectTo($request, $guard)
+    protected function redirectTo(Request $request, ?string $guard): ?string
     {
-        //
+        if (! isset(self::$redirectToCallback)) {
+            return null;
+        }
+
+        return (self::$redirectToCallback)($request, $guard);
+    }
+
+    /**
+     * Set the redirection callback.
+     */
+    public static function setRedirectTo(Closure $callback): void
+    {
+        self::$redirectToCallback = $callback;
     }
 }

@@ -4,8 +4,11 @@ namespace JulioMotol\AuthTimeout\Tests;
 
 use Carbon\Carbon;
 use Illuminate\Auth\AuthenticationException;
+use Illuminate\Auth\AuthManager;
+use Illuminate\Events\Dispatcher;
 use Illuminate\Foundation\Testing\Concerns\InteractsWithTime;
 use Illuminate\Http\Request;
+use Illuminate\Session\SessionManager;
 use JulioMotol\AuthTimeout\Events\AuthTimeoutEvent;
 use JulioMotol\AuthTimeout\Middleware\AuthTimeoutMiddleware;
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
@@ -14,20 +17,11 @@ class AuthTimeoutMiddlewareTest extends TestCase
 {
     use InteractsWithTime;
 
-    /**
-     * @var \Illuminate\Auth\AuthManager
-     */
-    protected $auth;
+    protected AuthManager $auth;
 
-    /**
-     * @var \Illuminate\Events\Dispatcher
-     */
-    protected $event;
+    protected Dispatcher $event;
 
-    /**
-     * @var \Illuminate\Session\SessionManager
-     */
-    protected $session;
+    protected SessionManager $session;
 
     protected function setUp(): void
     {
@@ -92,6 +86,31 @@ class AuthTimeoutMiddlewareTest extends TestCase
         $this->assertNull($this->session->get(config('auth-timeout.session')));
     }
 
+    /** @test */
+    public function can_modify_redirection()
+    {
+        $this->expectException(AuthenticationException::class);
+
+        $redirectionCallback = function () {
+            return 'test';
+        };
+
+        AuthTimeoutMiddleware::setRedirectTo($redirectionCallback);
+
+        $this->hasAuth();
+        $this->runMiddleware();
+
+        $this->travel(config('auth-timeout.timeout') + 1)->minutes();
+
+        try {
+            $this->runMiddleware();
+        } catch (AuthenticationException $exception) {
+            $this->assertSame($redirectionCallback(), $exception->redirectTo());
+
+            throw $exception;
+        }
+    }
+
     private function hasAuth()
     {
         $user = new User(['name' => 'Unit Test User']);
@@ -101,15 +120,15 @@ class AuthTimeoutMiddlewareTest extends TestCase
 
     private function runMiddleware()
     {
-        $middleware = app(AuthTimeoutMiddleware::class);
         $symfonyRequest = new SymfonyRequest([
             'foo' => 'bar',
             'baz' => '',
         ]);
         $symfonyRequest->server->set('REQUEST_METHOD', 'GET');
+
         $request = Request::createFromBase($symfonyRequest);
 
-        $middleware->handle($request, function (Request $newRequest) use ($request) {
+        app(AuthTimeoutMiddleware::class)->handle($request, function (Request $newRequest) use ($request) {
             $this->assertSame($request, $newRequest);
         });
     }
