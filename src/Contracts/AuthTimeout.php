@@ -2,6 +2,8 @@
 
 namespace JulioMotol\AuthTimeout\Contracts;
 
+use Carbon\Carbon;
+
 interface AuthTimeout
 {
     /**
@@ -18,4 +20,9 @@ interface AuthTimeout
      * Reset the user's timeout session.
      */
     public function reset(): void;
+
+    /**
+     * Get the last active session time.
+     */
+    public function lastActiveAt(): ?Carbon;
 }

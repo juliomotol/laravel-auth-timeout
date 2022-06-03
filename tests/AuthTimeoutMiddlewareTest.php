@@ -10,6 +10,7 @@ use Illuminate\Foundation\Testing\Concerns\InteractsWithTime;
 use Illuminate\Http\Request;
 use Illuminate\Session\SessionManager;
 use JulioMotol\AuthTimeout\Events\AuthTimeoutEvent;
+use JulioMotol\AuthTimeout\Facades\AuthTimeout;
 use JulioMotol\AuthTimeout\Middleware\AuthTimeoutMiddleware;
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 
@@ -51,13 +52,13 @@ class AuthTimeoutMiddlewareTest extends TestCase
         $this->hasAuth();
         $this->runMiddleware();
 
-        $this->assertEquals((string)Carbon::now(), $this->session->get(config('auth-timeout.session')));
+        $this->assertNotNull(AuthTimeout::lastActiveAt());
     }
 
     /** @test */
     public function should_reset_session_when_not_timedout()
     {
-        $init_time = time();
+        $startTime = Carbon::now();
 
         $this->hasAuth();
         $this->runMiddleware();
@@ -66,7 +67,7 @@ class AuthTimeoutMiddlewareTest extends TestCase
 
         $this->runMiddleware();
 
-        $this->assertNotEquals($init_time, $this->session->get(config('auth-timeout.session')));
+        $this->assertNotEquals($startTime, AuthTimeout::lastActiveAt());
     }
 
     /** @test */
@@ -83,7 +84,7 @@ class AuthTimeoutMiddlewareTest extends TestCase
 
         $this->expectsEvents(AuthTimeoutEvent::class);
         $this->assertNull($this->auth->user());
-        $this->assertNull($this->session->get(config('auth-timeout.session')));
+        $this->assertNull(AuthTimeout::lastActiveAt());
     }
 
     /** @test */
@@ -109,6 +110,19 @@ class AuthTimeoutMiddlewareTest extends TestCase
 
             throw $exception;
         }
+    }
+
+    /** @test */
+    public function is_backwards_compatible_with_v2()
+    {
+        $this->session->put(config('auth-timeout.session'), time());
+
+        $this->hasAuth();
+        $this->runMiddleware();
+
+        $this->travel(config('auth-timeout.timeout') - 1)->minutes();
+
+        $this->runMiddleware();
     }
 
     private function hasAuth()

@@ -26,7 +26,7 @@ class AuthTimeout implements AuthTimeoutContract
      */
     public function init(): void
     {
-        if (! $this->session->get($this->session_key)) {
+        if (! $this->lastActiveAt()) {
             $this->reset();
         }
     }
@@ -41,11 +41,11 @@ class AuthTimeout implements AuthTimeoutContract
             return false;
         }
 
-        $lastActiveAt = Carbon::parse($this->session->get($this->session_key));
-        $timeoutAt = $lastActiveAt->addMinutes(config('auth-timeout.timeout'));
-
         // Now lets check if they are still within the timeout threshold.
-        if ($timeoutAt->greaterThan(Carbon::now())) {
+        if ($this->lastActiveAt()
+            ->addMinutes(config('auth-timeout.timeout'))
+            ->greaterThan(Carbon::now())
+        ) {
             return true;
         }
 
@@ -67,5 +67,17 @@ class AuthTimeout implements AuthTimeoutContract
     public function reset(): void
     {
         $this->session->put($this->session_key, (string)Carbon::now());
+    }
+
+    public function lastActiveAt(): ?Carbon
+    {
+        if ($lastActivity = $this->session->get($this->session_key)) {
+            // In v2, `$lastActivity` was stored as `int` using `time`. To preseve compatibility
+            // with v3, lets first check if it is numeric then parse it back to `int` just in case
+            // Laravel's session store messes with its type.
+            return Carbon::parse(is_numeric($lastActivity) ? (int)$lastActivity : $lastActivity);
+        }
+
+        return null;
     }
 }
