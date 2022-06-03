@@ -5,7 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v3.1.0 (2021-04-18)
+## v3.1.1 (2022-06-03)
+
+### Fixed
+
+-   Fix compatibility with v2 session timeout storing. [#24](https://github.com/juliomotol/laravel-auth-timeout/issues/24)
+## v3.1.0 (2022-04-18)
 
 ### Added
 
