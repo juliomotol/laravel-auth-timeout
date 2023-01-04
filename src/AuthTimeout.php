@@ -3,81 +3,67 @@
 namespace JulioMotol\AuthTimeout;
 
 use Carbon\Carbon;
-use Illuminate\Auth\AuthManager;
-use Illuminate\Events\Dispatcher;
-use Illuminate\Session\SessionManager;
+use Illuminate\Contracts\Auth\Factory;
+use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Session\Store;
 use JulioMotol\AuthTimeout\Contracts\AuthTimeout as AuthTimeoutContract;
-use JulioMotol\AuthTimeout\Events\AuthTimeoutEvent;
 
 class AuthTimeout implements AuthTimeoutContract
 {
-    protected string $session_key;
-
     public function __construct(
-        protected AuthManager $auth,
+        protected Factory $auth,
         protected Dispatcher $event,
-        protected SessionManager $session
+        protected Store $session
     ) {
-        $this->session_key = config('auth-timeout.session');
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function init(): void
     {
-        if (! $this->lastActiveAt()) {
-            $this->reset();
+        if ($this->lastActiveAt()) {
+            return;
         }
+
+        $this->hit();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function check(string $guard = null): bool
     {
-        // When there are no user's logged in, we'll return false.
-        if ($this->auth->guard($guard)->guest()) {
+        $user = $this->auth->guard($guard)->user();
+
+        if (! $user) {
             return false;
         }
 
-        // Now lets check if they are still within the timeout threshold.
-        if ($this->lastActiveAt()
-            ->addMinutes(config('auth-timeout.timeout'))
-            ->greaterThan(Carbon::now())
-        ) {
+        if ($this->lastActiveAt()?->addMinutes(config('auth-timeout.timeout'))->isFuture()) {
             return true;
         }
 
-        // At this point we know that they have timed out so we'll log them
-        // out, dispatch an event, invalidate the session we've set, and return
-        // false.
-        $user = $this->auth->guard($guard)->user();
-
         $this->auth->guard($guard)->logout();
-        $this->event->dispatch(new AuthTimeoutEvent($user, $guard));
-        $this->session->forget($this->session_key);
+        $this->event->dispatch(new (config('auth-timeout.event'))($user, $guard));
+        $this->session->forget($this->getSessionKey());
 
         return false;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function reset(): void
+    public function hit(): void
     {
-        $this->session->put($this->session_key, (string)Carbon::now());
+        $this->session->put($this->getSessionKey(), (string) Carbon::now());
     }
 
     public function lastActiveAt(): ?Carbon
     {
-        if ($lastActivity = $this->session->get($this->session_key)) {
+        if ($lastActivity = $this->session->get($this->getSessionKey())) {
             // In v2, `$lastActivity` was stored as `int` using `time`. To preseve compatibility
             // with v3, lets first check if it is numeric then parse it back to `int` just in case
             // Laravel's session store messes with its type.
-            return Carbon::parse(is_numeric($lastActivity) ? (int)$lastActivity : $lastActivity);
+            return Carbon::parse(is_numeric($lastActivity) ? (int) $lastActivity : $lastActivity);
         }
 
         return null;
+    }
+
+    protected function getSessionKey(): string
+    {
+        return config('auth-timeout.session');
     }
 }

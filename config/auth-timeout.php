@@ -26,4 +26,16 @@ return [
 
     'timeout' => 15,
 
+    /*
+    |--------------------------------------------------------------------------
+    | Timeout Event
+    |--------------------------------------------------------------------------
+    |
+    | Here you may specify the event that will be dispatched when a user has.
+    | timed out.
+    |
+    */
+
+    'event' => JulioMotol\AuthTimeout\Events\AuthTimedOut::class,
+
 ];
