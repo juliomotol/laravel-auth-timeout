@@ -5,7 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v3.1.0 (2021-04-18)
+
+## Unreleased
+
+Laravel Auth Timeout has received a complete refresh. Please make sure to read through all the changes.
+
+## Added
+
+- Support for Laravel 10.x.
+- Added `event` in config.
+
+## Changed
+
+- Deprecated `JulioMotol\AuthTimeout\Contracts\AuthTimeout`'s `reset()` method and will be remove on a future release. Use `hit()` instead.
+    - The same change applies to `JulioMotol\AuthTimeout\Facade\AuthTimeout` and `JulioMotol\AuthTimeout\Facade\AuthTimeout`
+- Renamed ~~`JulioMotol\AuthTimeout\Events\AuthTimeoutEvent`~~ to `JulioMotol\AuthTimeout\Events\AuthTimedOut`.
+- Renamed ~~`JulioMotol\AuthTimeout\Middleware\AuthTimeoutMiddleware`~~ to `JulioMotol\AuthTimeout\Middlewares\CheckAuthTimeout`.
+- Auth Timeout initialization has been moved by listening to the `Illuminate\Auth\Events\Login`.
+    - This was previously initialized within the `JulioMotol\AuthTimeout\Middleware\AuthTimeoutMiddleware`
+
+## v3.1.1 (2022-06-03)
+
+### Fixed
+
+-   Fix compatibility with v2 session timeout storing. [#24](https://github.com/juliomotol/laravel-auth-timeout/issues/24)
+
+## v3.1.0 (2022-04-18)
 
 ### Added
 

@@ -1,18 +1,21 @@
 # Laravel Auth Timeout
 
-[![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/juliomotol/laravel-auth-timeout.svg?style=flat-square)](https://packagist.org/packages/juliomotol/laravel-auth-timeout)
+[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/juliomotol/laravel-auth-timeout/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/juliomotol/laravel-auth-timeout/actions?query=workflow%3Arun-tests+branch%3Amain)
+[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/juliomotol/laravel-auth-timeout/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/juliomotol/laravel-auth-timeout/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/juliomotol/laravel-auth-timeout.svg?style=flat-square)](https://packagist.org/packages/juliomotol/laravel-auth-timeout)
 
-A small Laravel 8+ package that handles Authentication Timeouts.
+Handle Authentication timeouts in Laravel.
 
-When upgrading to v3, please see the [CHANGELOG.md](./CHANGELOG.md).
+> When upgrading to v4, please see the [CHANGELOG.md](./CHANGELOG.md).
 
+> For Laravel 8+ support, see [v3](https://github.com/juliomotol/laravel-auth-timeout/tree/v3).
+>
 > For Laravel 6+ support, see [v2](https://github.com/juliomotol/laravel-auth-timeout/tree/v2).
 
 ## Why Laravel Auth Timeout?
 
-There are times where we want to log out a user when they haven't done and request in a set of time. There is a workaround (below):
+There are times where we want to log out a user when they haven't done any request within a set time. There is a workaround (below):
 
 ```
 /* Somewhere in config/session.php */
@@ -31,97 +34,112 @@ You can install the package via composer:
 composer require juliomotol/laravel-auth-timeout
 ```
 
-## Config
+You can publish the config file with:
 
-| Key     | Default value          | Description                               |
-| ------- | ---------------------- | ----------------------------------------- |
-| session | `"last_activity_time"` | The name of the session token to be used. |
-| timeout | `15`                   | The timeout duration in minutes.          |
+```bash
+php artisan vendor:publish --tag="laravel-auth-timeout-config"
+```
 
-> If you want to make changes in the configuration you can publish the config file using:
->
-> ```sh
-> php artisan vendor:publish --provider="JulioMotol\AuthTimeout\ServiceProvider"
-> ```
+This is the contents of the published config file:
+
+```php
+<?php
+
+return [
+
+    /**
+     * The session name used to identify if the user has reached the timeout time.
+     */
+    'session' => 'last_activity_time',
+
+
+    /**
+     * The minutes of idle time before the user is logged out.
+     */
+    'timeout' => 15,
+
+    /**
+     * The event that will be dispatched when a user has timed out.
+     */
+    'event' => JulioMotol\AuthTimeout\Events\AuthTimedOut::class,
+
+];
+```
 
 ## Usage
 
 ### Quick Start
 
-For a simple usage, include the `AuthTimeoutMiddleware` in your `Kernel.php` and use that middleware on the route you want this to take effect in.
+For a simple usage, register the `CheckAuthTimeout` in your `Kernel.php`.
 
 ```php
-/* Kernel.php */
-
 protected $routeMiddleware = [
     ...
-    'auth.timeout' => \JulioMotol\AuthTimeout\Middleware\AuthTimeoutMiddleware::class,
+    'auth.timeout' => \JulioMotol\AuthTimeout\Middlewares\CheckAuthTimeout::class,
     ...
 ];
+```
 
-/* Routes.php */
+Then use that middleware on a route.
+
+```php
 Route::get('/admin', [
     'uses' => 'FooBarController@Foobar',
     'middleware' => ['auth.timeout']
 ]);
 ```
 
-### Custom Guards
+### Using Different Guards
 
-You might have multiple guards and only want to apply `AuthTimeoutMiddleware` to certain ones. We got you covered, `AuthTimeoutMiddleware` accepts a `$guard` as its parameter.
+You might have multiple guards and only want to apply `CheckAuthTimeout` to certain ones. We got you covered, `CheckAuthTimeout` accepts a `$guard` parameter.
 
 ```php
-// Lets say you have added a 'web.admin' guard in your config/auth.php...
-
-/* Routes.php */
 Route::get('/admin', [
     'uses' => 'FooBarController@Foobar',
-    'middleware' => ['auth.timeout:web.admin'] // Add the guard name as a parameter for the auth.timeout middleware.
+    'middleware' => ['auth.timeout:custom-guard'] // Add the guard name as a parameter for the auth.timeout middleware.
 ]);
 ```
 
-> This package only works with guards that uses `session` as its driver
+> NOTE: This package only works with guards that uses a `session` driver.
 
-### AuthTimeoutEvent
+### AuthTimedOut
 
-An `AuthTimeoutEvent` will dispatch every time a user has timed out. You can assign a listener for this event in your `EventServiceProvider`.
+An `AuthTimedOut` will be dispatch every time a user has timed out. You can assign a listener for this event in your `EventServiceProvider`.
 
 ```php
 protected $listen = [
-    \JulioMotol\AuthTimeout\Events\AuthTimeoutEvent::class => [
-        // Your Listeners...
+    \JulioMotol\AuthTimeout\Events\AuthTimedOut::class => [
+        // ...
     ],
 ];
 ```
 
-`AuthTimeoutEvent` has two properties that you can access in your `EventListener`.
+`AuthTimedOut` has two properties that you can access in your `EventListener`.
 
 ```php
 class FooEventListener
 {
-    public function handle(AuthTimeoutEvent $event)
+    public function handle(AuthTimedOut $event)
     {
-        $event->user;   // The user that timed out.
-        $event->guard;  // The authentication guard.
+        $event->user;
+        $event->guard;
     }
 }
 ```
 
 ### Redirection
 
-To modify the redirection when a user has timed out, you can use `AuthTimeoutMiddleware::setRedirectTo()` within your `AppServiceProvider` to set a redirection callback.
+To modify the redirection when a user has timed out, you can use `CheckAuthTimeout::setRedirectTo()` within your `AppServiceProvider` to set a redirection callback.
 
 ```php
 class AppServiceProvider extends ServiceProvider
 {
     public function boot()
     {
-        AuthTimeoutMiddleware::setRedirectTo(function ($request, $guard){
-            switch($guard){
-                case 'web.admin':
-                    return route('auth.admin.login');
-                default:
-                    return route('auth.login');
+        CheckAuthTimeout::setRedirectTo(function ($request, $guard){
+            return match($guard){
+                'custom-guard' => route('some.route'),
+                default => route('auth.login')
             }
         });
     }
@@ -132,24 +150,33 @@ class AppServiceProvider extends ServiceProvider
 
 This package also provides a facade with the following methods:
 
--   `AuthTimeout::init()` - Initialize the timeout session when no has been set yet.
--   `AuthTimeout::check($guard = null)` - Check if a user has timed out and logs them out if so.
--   `AuthTimeout::reset()` - Reset the user's timeout session.
+```php
+AuthTimeout::init() // Initialize the timeout session when no has been set yet.
+
+AuthTimeout::check($guard) // Check if a user has timed out and logs them out if so.
+
+AuthTimeout::hit() // Reset the user's timeout session.
+
+AuthTimeout::lastActiveAt() // The last activity time of the user.
+```
+
+## Changelog
+
+Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
 
 ## Contributing
 
-Contributions are **welcome** and will be fully **credited**. We accept contributions via Pull Requests on [Github](https://github.com/juliomotol/larvel-auth-timeout).
+Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 
-Please read and understand the contribution guide before creating an issue or pull request.
+## Security Vulnerabilities
 
-### Pull Requests
+Please review [our security policy](../../security/policy) on how to report security vulnerabilities.
 
-Before submitting a pull request:
+## Credits
 
--   Make sure to write tests!
--   Document any change in behaviour. Make sure the `README.md` and any other relevant documentation are kept up-to-date.
--   One pull request per feature. If you want to do more than one thing, send multiple pull requests.
+- [Julio Motol](https://github.com/juliomotol)
+- [All Contributors](../../contributors)
 
 ## License
 
-This project and the Laravel framework are open-sourced software licensed under the [MIT license](http://opensource.org/licenses/MIT).
+The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
