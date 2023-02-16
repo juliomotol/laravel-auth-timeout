@@ -150,10 +150,15 @@ class AppServiceProvider extends ServiceProvider
 
 This package also provides a facade with the following methods:
 
--   `AuthTimeout::init(): void` - Initialize the timeout session when no has been set yet.
--   `AuthTimeout::check($guard = null): bool` - Check if a user has timed out and logs them out if so.
--   `AuthTimeout::hit(): void` - Reset the user's timeout session.
--   `AuthTimeout::lastActiveAt(): ?Carbon` - The last activity time of the user.
+```php
+AuthTimeout::init() // Initialize the timeout session when no has been set yet.
+
+AuthTimeout::check($guard) // Check if a user has timed out and logs them out if so.
+
+AuthTimeout::hit() // Reset the user's timeout session.
+
+AuthTimeout::lastActiveAt() // The last activity time of the user.
+```
 
 ## Changelog
 
