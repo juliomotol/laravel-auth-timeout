@@ -16,7 +16,7 @@ Laravel Auth Timeout has received a complete refresh. Please make sure to read t
 
 ## Changed
 
-- Renamed ~~`reset()`~~ to `hit()` in `JulioMotol\AuthTimeout\Contracts\AuthTimeout`.
+- Deprecated `JulioMotol\AuthTimeout\Contracts\AuthTimeout`'s `reset()` method and will be remove on a future release. Use `hit()` instead.
     - The same change applies to `JulioMotol\AuthTimeout\Facade\AuthTimeout` and `JulioMotol\AuthTimeout\Facade\AuthTimeout`
 - Renamed ~~`JulioMotol\AuthTimeout\Events\AuthTimeoutEvent`~~ to `JulioMotol\AuthTimeout\Events\AuthTimedOut`.
 - Renamed ~~`JulioMotol\AuthTimeout\Middleware\AuthTimeoutMiddleware`~~ to `JulioMotol\AuthTimeout\Middlewares\CheckAuthTimeout`.

@@ -45,6 +45,11 @@ class AuthTimeout implements AuthTimeoutContract
         return false;
     }
 
+    public function reset(): void
+    {
+        $this->hit();
+    }
+
     public function hit(): void
     {
         $this->session->put($this->getSessionKey(), (string) Carbon::now());

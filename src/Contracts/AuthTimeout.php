@@ -10,6 +10,9 @@ interface AuthTimeout
 
     public function check(string $guard = null): bool;
 
+    /** @deprecated Use `hit()` instead. */
+    public function reset(): void;
+
     public function hit(): void;
 
     public function lastActiveAt(): ?Carbon;
