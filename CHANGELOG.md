@@ -10,12 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Laravel Auth Timeout has received a complete refresh. Please make sure to read through all the changes.
 
-## Added
+### Added
 
 - Support for Laravel 10.x.
 - Added `event` in config.
 
-## Changed
+### Changed
 
 - Deprecated `JulioMotol\AuthTimeout\Contracts\AuthTimeout`'s `reset()` method and will be remove on a future release. Use `hit()` instead.
     - The same change applies to `JulioMotol\AuthTimeout\Facade\AuthTimeout` and `JulioMotol\AuthTimeout\Facade\AuthTimeout`
