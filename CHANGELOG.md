@@ -12,6 +12,7 @@ Laravel Auth Timeout has received a complete refresh. Please make sure to read t
 
 ## Added
 
+- Support for Laravel 10.x.
 - Added `event` in config.
 
 ## Changed
