@@ -5,7 +5,7 @@ namespace JulioMotol\AuthTimeout\Events;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Queue\SerializesModels;
 
-class AuthTimeoutEvent
+class AuthTimedOut
 {
     use SerializesModels;
 
