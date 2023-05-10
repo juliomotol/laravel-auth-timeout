@@ -4,15 +4,12 @@ namespace JulioMotol\AuthTimeout\Tests;
 
 use Carbon\Carbon;
 use Illuminate\Auth\AuthenticationException;
-use Illuminate\Auth\Events\Login;
 use Illuminate\Foundation\Auth\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Session;
 use JulioMotol\AuthTimeout\Facades\AuthTimeout;
 use JulioMotol\AuthTimeout\Middlewares\CheckAuthTimeout;
-use function Pest\Laravel\actingAs;
 use function Pest\Laravel\travel;
 
 afterEach(function () {
@@ -22,7 +19,11 @@ afterEach(function () {
 });
 
 it('should proceed when user is guest', function () {
+    expect(AuthTimeout::lastActiveAt())->toBeNull();
+
     runMiddleware();
+
+    expect(AuthTimeout::lastActiveAt())->toBeNull();
 });
 
 it('should timeout when idled', function () {
@@ -53,9 +54,9 @@ it('can modify redirection', function () {
 })->throws(AuthenticationException::class);
 
 it('should reset session when not timed out', function () {
-    $startTime = Carbon::now();
-
     login();
+
+    $startTime = AuthTimeout::lastActiveAt();
 
     travel(config('auth-timeout.timeout') - 1)->minutes();
 
@@ -66,10 +67,11 @@ it('should reset session when not timed out', function () {
 
 function login()
 {
-    $user = new User();
+    Session::start();
 
-    actingAs($user);
-    Event::dispatch(new Login('test', $user, false));
+    Auth::login(new User());
+
+    expect(AuthTimeout::lastActiveAt())->toBeInstanceOf(Carbon::class);
 }
 
 function runMiddleware()

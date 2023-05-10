@@ -9,7 +9,7 @@ class InitializeAuthTimeout
 {
     public function handle(): void
     {
-        if (! Session::isStarted()) {
+        if (Session::isStarted()) {
             AuthTimeout::init();
         }
     }
