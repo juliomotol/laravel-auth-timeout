@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use JulioMotol\AuthTimeout\Facades\AuthTimeout;
 use JulioMotol\AuthTimeout\Middlewares\CheckAuthTimeout;
+
 use function Pest\Laravel\travel;
 
 afterEach(function () {
@@ -47,7 +48,7 @@ it('can modify redirection', function () {
     try {
         runMiddleware();
     } catch (AuthenticationException $exception) {
-        expect($exception->redirectTo())->toEqual('test');
+        expect($exception->redirectTo(new Request()))->toEqual('test');
 
         throw $exception;
     }

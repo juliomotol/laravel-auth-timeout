@@ -13,7 +13,7 @@ class CheckAuthTimeout
 {
     public static ?Closure $redirectToCallback = null;
 
-    public function handle(Request $request, Closure $next, string $guard = null): ?Response
+    public function handle(Request $request, Closure $next, ?string $guard = null): ?Response
     {
         if (Auth::guard($guard)->guest()) {
             return $next($request);

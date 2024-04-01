@@ -8,7 +8,7 @@ interface AuthTimeout
 {
     public function init(): void;
 
-    public function check(string $guard = null): bool;
+    public function check(?string $guard = null): bool;
 
     /** @deprecated Use `hit()` instead. */
     public function reset(): void;

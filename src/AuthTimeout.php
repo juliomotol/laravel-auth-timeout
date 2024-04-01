@@ -26,7 +26,7 @@ class AuthTimeout implements AuthTimeoutContract
         $this->hit();
     }
 
-    public function check(string $guard = null): bool
+    public function check(?string $guard = null): bool
     {
         $user = $this->auth->guard($guard)->user();
 
