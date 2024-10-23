@@ -140,7 +140,7 @@ class AppServiceProvider extends ServiceProvider
             return match($guard){
                 'custom-guard' => route('some.route'),
                 default => route('auth.login')
-            }
+            };
         });
     }
 }
