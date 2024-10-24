@@ -37,7 +37,7 @@ composer require juliomotol/laravel-auth-timeout
 You can publish the config file with:
 
 ```bash
-php artisan vendor:publish --tag="laravel-auth-timeout-config"
+php artisan vendor:publish --tag="auth-timeout-config"
 ```
 
 This is the contents of the published config file:
