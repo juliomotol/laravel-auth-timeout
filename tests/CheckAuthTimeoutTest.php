@@ -48,7 +48,7 @@ it('can modify redirection', function () {
     try {
         runMiddleware();
     } catch (AuthenticationException $exception) {
-        expect($exception->redirectTo(new Request()))->toEqual('test');
+        expect($exception->redirectTo(new Request))->toEqual('test');
 
         throw $exception;
     }
@@ -70,14 +70,14 @@ function login()
 {
     Session::start();
 
-    Auth::login(new User());
+    Auth::login(new User);
 
     expect(AuthTimeout::lastActiveAt())->toBeInstanceOf(Carbon::class);
 }
 
 function runMiddleware()
 {
-    app(CheckAuthTimeout::class)->handle(new Request(), function (Request $request) {
+    app(CheckAuthTimeout::class)->handle(new Request, function (Request $request) {
         expect(true)->toBeTrue();
     });
 }

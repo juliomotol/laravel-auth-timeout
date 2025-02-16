@@ -14,8 +14,7 @@ class AuthTimeout implements AuthTimeoutContract
         protected Factory $auth,
         protected Dispatcher $event,
         protected Store $session
-    ) {
-    }
+    ) {}
 
     public function init(): void
     {
