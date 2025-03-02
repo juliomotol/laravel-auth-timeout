@@ -9,7 +9,7 @@ use JulioMotol\AuthTimeout\Contracts\AuthTimeout as AuthTimeoutContract;
  * @method static void init()
  * @method static bool check($guard = null)
  * @method static void hit()
- * @method static ?Carbon\Carbon lastActiveAt()
+ * @method static ?\Carbon\Carbon lastActiveAt()
  *
  * @see \JulioMotol\AuthTimeout\AuthTimeout
  */
