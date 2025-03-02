@@ -63,7 +63,7 @@ it('returns false when user is timed out', function ($event) {
                 fn () => tap(
                     Mockery::mock(StatefulGuard::class),
                     fn (MockInterface $mock) => $mock->shouldReceive('user')
-                        ->andReturn(new User())
+                        ->andReturn(new User)
                         ->shouldReceive('logout')
                 )
             );
@@ -99,7 +99,7 @@ it('returns true when user is not timed out', function () {
                     Mockery::mock(StatefulGuard::class),
                     fn (MockInterface $mock) => $mock->shouldReceive('user')
                         ->once()
-                        ->andReturn(new User())
+                        ->andReturn(new User)
                 )
             );
     });
@@ -154,6 +154,4 @@ it('returns null when getting last active at and not initialized', function () {
     expect($result)->toBeNull();
 });
 
-class CustomEvent
-{
-}
+class CustomEvent {}
